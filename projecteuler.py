@@ -1827,10 +1827,17 @@ def problem81_a_star():
     from math import sqrt
     
     class node():
-        def __init__(self, row, col, val):
+        def __init__(self, row, col, hscore, val=None, parent=None):
             self.row = row
             self.col = col
-            self.val = val
+            if val is None:
+                self.val = 9999
+            else:
+                self.val = val
+            self.neighbors = []
+            self.hscore = hscore
+            self.fscore = val + self.hscore
+            self.parent = parent
             
         def get_val(self):
             return self.val
@@ -1838,22 +1845,31 @@ def problem81_a_star():
         def get_pos(self):
             return (self.row, self.col)
 
-        def get_h(self):
-            return self.h
+        def get_h_score(self):
+            return self.hscore
 
-        def get_h_score(self, xDest, yDest):
-            dx = xDest - self.row
-            dy = yDest - self.col
-            # Euclidean Distance
-            # dist = sqrt( dx * dx + dy * dy)
-            # Manhattan distance
-            dist = abs(dx) + abs(dy)
-            # Chebyshev distance
-            # dist = max(abs(dx), abs(dy))
-            return dist
+        def get_f_score(self):
+            return self.fscore
+
+        def update_neighbors(self, neighbors):
+            for neighbor in neighbors:
+                self.neighbors.append(neighbor)
+
+        def get_neighbors(self):
+            return self.neighbors
+
+    def get_h_score(xCurr, yCurr, xDest, yDest):
+        dx = xDest - xCurr
+        dy = yDest - yCurr
+        # Euclidean Distance
+        # dist = sqrt( dx * dx + dy * dy)
+        # Manhattan distance
+        dist = abs(dx) + abs(dy)
+        # Chebyshev distance
+        # dist = max(abs(dx), abs(dy))
+        return 18 * dist
             
-    def loadmatrix():
-        fname = 'matrix.txt'
+    def loadmatrix(fname):
         f = open(fname, 'r')
         matrix = []
         for row in f:
@@ -1861,30 +1877,98 @@ def problem81_a_star():
         print "Matrix loaded."
         return matrix
 
-    def search(start, end):
-        openset = set()
-        closedset = set()
-        current = start
-        openset.add(current)
+    def a_star(start, end, matrix):
+        closedset = []
+        openset = [start]
+        came_from = []
+        came_from.append(start)
+        lowest_sum = 0
+
         while openset:
-            current = min
-            
+            openset = sorted(openset, key=lambda x:x.get_f_score())
+            current = openset.pop(0)
+            print current.get_pos(), current.get_val()
+            lowest_sum += current.get_val()
+            if current == end:
+                return lowest_sum
+
+            closedset.append(current)
+            for neighbor in current.get_neighbors():
+                this_g = current.get_val() + neighbor.get_val()
+                this_f = this_g + neighbor.get_h_score()
+                if neighbor in closedset and this_f >= neighbor.get_f_score():
+                    continue
+
+                if neighbor not in openset or this_f < neighbor.get_f_score():
+                    came_from.append(neighbor)
+                    if neighbor not in openset:
+                        openset.append(neighbor)
+                        
+        return "Path not found."
+                
+    
+    def find_neighbors(row, col, nodes):
+        #Note: Current values are for test 5x5 matrix, not the 80x80 one.
+        neighbors = []
+        if not row-1 < 0:
+            neighbors.append(nodes[row-1][col])
+        if not row+1 > len(nodes)-1:
+            neighbors.append(nodes[row+1][col])
+        if not col-1 < 0:
+            neighbors.append(nodes[row][col-1])
+        if not col + 1 > len(nodes)-1:
+            neighbors.append(nodes[row][col+1])
+        return neighbors
+        
     def main():
         xgoal, ygoal = 79, 79
-        matrix = loadmatrix()
-        nodes = []
+        matrix = loadmatrix('matrix.txt')
+        nodes = [[None for _ in xrange(len(matrix)-1)] for _ in xrange(len(matrix)-1)]
+        #First pass instantiates the nodes of the matrix
         for row in xrange(len(matrix)-1):
             for col in xrange(len(matrix)-1):
-                nodes.append(node(row, col, matrix[row][col]))
+                nodes[row][col] = node(
+                                row, col,
+                                #find_neighbors(row, col, nodes),
+                                get_h_score(row, col, xgoal, ygoal),
+                                matrix[row][col]
+                                       )
+        #Second pass finds neighbors of each node in nodes
+        for row in xrange(len(matrix)-1):
+            for col in xrange(len(matrix)-1):
+                nodes[row][col].update_neighbors(find_neighbors(row,col,nodes))
+        
+        print a_star(nodes[0][0], nodes[78][78], nodes)
 
-        for i in xrange(10):
-            print nodes[i].get_pos(), nodes[i].get_h_score(xgoal, ygoal)
+    def test():
+        #Testing the 5x5 matrix. Sum is 2297
+        #Path is (0,0), (1,0), (1,1), (1,2), (0,2), (0,3), (0,4), (1,4)
+        #(2,4), (2,3), (3,3), (4,3), (4,4)
+        matrix = loadmatrix('matrix2.txt')
+        #Instaniate the nodes using the values of the matrix
+        xgoal, ygoal = 4, 4
+        nodes = [[None for _ in xrange(len(matrix))] for _ in xrange(len(matrix))]
+        for row in xrange(len(matrix)):
+            for col in xrange(len(matrix)):
+                nodes[row][col] = node(
+                    row, col,
+                    get_h_score(row, col, xgoal, ygoal),
+                    matrix[row][col]
+                    )
+        #Second pass to find neighbors of each node.
+        for row in xrange(len(matrix)):
+            for col in xrange(len(matrix)):
+                 nodes[row][col].update_neighbors(find_neighbors(row, col, nodes))
 
+        print a_star(nodes[0][0], nodes[4][4], nodes)
+
+        #Algorithm finds the correct path, need to keep track of parent nodes
+        # in order to return the correct value.
+        
     if __name__ == "__main__":
-        main()
+        test()
         
-problem81_a_star()
-        
+
 def problem82():
     """
     Same premise as problem 81, but now starting from any location in
@@ -1897,6 +1981,46 @@ def problem82():
 
     if __name__ == "__main__":
         main()
+
+def problem83():
+    """
+    Same premise as problem 81, but you are now able to move up, down, left, or
+    right in the matrix as you travel from (0,0) to (79,79).
+    """
+    import heapq
+    from time import clock
+
+    def a_star(matrix):
+        n = len(matrix)
+        vector = (1,0), (0,1), (-1,0), (0,-1)
+        visited = [[False] * n for j in xrange(n)]
+        visited[0][0] = True
+
+        l = []
+        heapq.heappush(l, [matrix[0][0],0,0])
+        while l:
+            s, x, y = heapq.heappop(l)
+            for i,j in vector:
+                u = x + i
+                v = y + j
+                if 0 <=  u < n and 0 <= v < n:
+                    if not visited[u][v]:
+                        sum1 = s + matrix[u][v]
+                        heapq.heappush(l, [sum1, u, v])
+                        visited[u][v] = True
+                    if u == n-1 and v == n - 1:
+                        return s + matrix[u][v]
+    def main():
+        f = open('matrix.txt')
+        matrix = [[int(i) for i in j.split(',')] for j in f]
+        t0 = clock()
+        print a_star(matrix)
+        print clock() - t0
+        
+    if __name__ == "__main__":
+        main()
+        
+problem83()
 
 
 
