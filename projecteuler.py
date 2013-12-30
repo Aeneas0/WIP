@@ -1887,22 +1887,28 @@ def problem81_a_star():
         while openset:
             openset = sorted(openset, key=lambda x:x.get_f_score())
             current = openset.pop(0)
-            print current.get_pos(), current.get_val()
-            lowest_sum += current.get_val()
+            #print current.get_pos()
+            #lowest_sum += current.get_val()
             if current == end:
-                return lowest_sum
+                #print lowest_sum
+                return retrace_path(current)
 
             closedset.append(current)
             for neighbor in current.get_neighbors():
-                this_g = current.get_val() + neighbor.get_val()
-                this_f = this_g + neighbor.get_h_score()
-                if neighbor in closedset and this_f >= neighbor.get_f_score():
-                    continue
-
-                if neighbor not in openset or this_f < neighbor.get_f_score():
-                    came_from.append(neighbor)
+                if neighbor not in closedset:
                     if neighbor not in openset:
                         openset.append(neighbor)
+                    neighbor.parent = current
+##                this_g = current.get_val() + neighbor.get_val()
+##                this_f = this_g + neighbor.get_h_score()
+##                if neighbor in closedset and this_f >= neighbor.get_f_score():
+##                    continue
+##
+##                if neighbor not in openset or this_f < neighbor.get_f_score():
+##                    came_from.append(neighbor)
+##                    if neighbor not in openset:
+##                        openset.append(neighbor)
+##                    neighbor.parent = current
                         
         return "Path not found."
                 
@@ -1919,6 +1925,14 @@ def problem81_a_star():
         if not col + 1 > len(nodes)-1:
             neighbors.append(nodes[row][col+1])
         return neighbors
+
+    def retrace_path(node):
+        path = []
+        path.append(node)
+        while node.parent:
+            node = node.parent
+            path.append(node)
+        return [node.get_pos() for node in path][::-1]
         
     def main():
         xgoal, ygoal = 79, 79
@@ -1967,7 +1981,8 @@ def problem81_a_star():
         
     if __name__ == "__main__":
         test()
-        
+
+problem81_a_star()
 
 def problem82():
     """
@@ -2020,7 +2035,7 @@ def problem83():
     if __name__ == "__main__":
         main()
         
-problem83()
+        
 
 
 
