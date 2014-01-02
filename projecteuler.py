@@ -1825,6 +1825,7 @@ def problem81_a_star():
     Same premise as problem 81, but solved with the A* algorithm.
     """
     from math import sqrt
+    import heapq
     
     class node():
         def __init__(self, row, col, hscore, val=None, parent=None):
@@ -1879,14 +1880,17 @@ def problem81_a_star():
 
     def a_star(start, end, matrix):
         closedset = []
-        openset = [start]
+        openset = []
+        heapq.heapify(openset)
+        heapq.heappush(openset, start)
         came_from = []
         came_from.append(start)
         lowest_sum = 0
 
         while openset:
-            openset = sorted(openset, key=lambda x:x.get_f_score())
-            current = openset.pop(0)
+            #openset = sorted(openset, key=lambda x:x.get_f_score())
+            #current = openset.pop(0)
+            current = heapq.heappop(openset)
             #print current.get_pos()
             #lowest_sum += current.get_val()
             if current == end:
@@ -1897,8 +1901,10 @@ def problem81_a_star():
             for neighbor in current.get_neighbors():
                 if neighbor not in closedset:
                     if neighbor not in openset:
-                        openset.append(neighbor)
-                    neighbor.parent = current
+                        heapq.heappush(openset, neighbor)
+                        #openset.append(neighbor)
+                        neighbor.parent = current
+                        openset.sort(compare)
 ##                this_g = current.get_val() + neighbor.get_val()
 ##                this_f = this_g + neighbor.get_h_score()
 ##                if neighbor in closedset and this_f >= neighbor.get_f_score():
@@ -1912,7 +1918,11 @@ def problem81_a_star():
                         
         return "Path not found."
                 
-    
+    def compare(a,b):
+        if a.get_f_score() < b.get_f_score(): return -1
+        elif a.get_f_score() == b.get_f_score(): return 0
+        else: return 1
+        
     def find_neighbors(row, col, nodes):
         #Note: Current values are for test 5x5 matrix, not the 80x80 one.
         neighbors = []
@@ -1978,11 +1988,32 @@ def problem81_a_star():
 
         #Algorithm finds the correct path, need to keep track of parent nodes
         # in order to return the correct value.
-        
-    if __name__ == "__main__":
-        test()
 
-problem81_a_star()
+    def testmatrix(filename):
+        matrix = loadmatrix(filename)
+        xgoal = ygoal = len(matrix)-1
+        nodes = []
+        nodes = [[None for _ in xrange(len(matrix)-1)] for _ in xrange(len(matrix)-1)]
+        #First pass instantiates the nodes of the matrix
+        for row in xrange(len(matrix)-1):
+            for col in xrange(len(matrix)-1):
+                nodes[row][col] = node(
+                                row, col,
+                                #find_neighbors(row, col, nodes),
+                                get_h_score(row, col, xgoal, ygoal),
+                                matrix[row][col]
+                                       )
+                
+        for row in xrange(len(matrix)-1):
+            for col in xrange(len(matrix)-1):
+                if not matrix[row][col] == nodes[row][col].get_val():
+                    print "Mismatch detected at: ", row, col
+                #print matrix[row][col], "   ", nodes[row][col].get_val()
+
+    if __name__ == "__main__":
+        main()
+
+#problem81_a_star()
 
 def problem82():
     """
@@ -1990,12 +2021,47 @@ def problem82():
     column 0 and moving only up, down, and right, finishing on the rightmost
     column. Find the minimum sum.
     """
-
+    #using networkx
+    import networkx as nx
+    print "NetworkX loaded."
+    
     def main():
-        print "Hello, world!"
+        G = nx.grid_2d_graph(80,80)
+        import itertools
+        from time import clock
+        coordinates = list(itertools.product(xrange(80), xrange(80)))
+        f = open('matrix.txt')
+        data2d = [[int(i) for i in j.split(',')] for j in f]
+        data1d = list(itertools.chain.from_iterable(data2d))
+        valdict = dict(zip(coordinates, data1d))
+        
+        for node in nx.nodes_iter(G):
+            G.node[node]['weight'] = valdict[node]
 
+        weightslist = []
+        for n1,n2 in nx.edges_iter(G):
+            weightslist.append(tuple((n1,n2,
+                                    (G.node[n1]['weight']+G.node[n2]['weight'])
+                                    )))
+        G.add_weighted_edges_from(weightslist)
+        
+        def dist(a,b):
+            (x1, y1) = a
+            (x2, y2) = b
+            #Euclidean distance.
+            #return ((x1-x2) ** 2 + (y1 - y2) ** 2) ** 0.5
+            #Manhattan distance.
+            return abs((x1-x2)) + abs((y1-y2))
+        
+        t0 = clock()
+        path = nx.astar_path(G,(0,0),(79,79),dist)
+        print sum([G.node[num]['weight'] for num in path])
+        print clock() - t0
+        
     if __name__ == "__main__":
         main()
+        
+problem82()
 
 def problem83():
     """
@@ -2003,7 +2069,7 @@ def problem83():
     right in the matrix as you travel from (0,0) to (79,79).
     """
     import heapq
-    from time import clock
+    from time import clock        
 
     def a_star(matrix):
         n = len(matrix)
@@ -2034,6 +2100,7 @@ def problem83():
         
     if __name__ == "__main__":
         main()
+
         
         
 
