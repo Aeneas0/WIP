@@ -2051,7 +2051,7 @@ def problem82():
             #Euclidean distance.
             #return ((x1-x2) ** 2 + (y1 - y2) ** 2) ** 0.5
             #Manhattan distance.
-            return abs((x1-x2)) + abs((y1-y2))
+            return abs((x1-x2)) + abs((y1-y2)) 
         
         t0 = clock()
         path = nx.astar_path(G,(0,0),(79,79),dist)
@@ -2060,8 +2060,6 @@ def problem82():
         
     if __name__ == "__main__":
         main()
-        
-problem82()
 
 def problem83():
     """
@@ -2071,7 +2069,7 @@ def problem83():
     import heapq
     from time import clock        
 
-    def a_star(matrix):
+    def search(matrix):
         n = len(matrix)
         vector = (1,0), (0,1), (-1,0), (0,-1)
         visited = [[False] * n for j in xrange(n)]
@@ -2095,7 +2093,7 @@ def problem83():
         f = open('matrix.txt')
         matrix = [[int(i) for i in j.split(',')] for j in f]
         t0 = clock()
-        print a_star(matrix)
+        print search(matrix)
         print clock() - t0
         
     if __name__ == "__main__":
