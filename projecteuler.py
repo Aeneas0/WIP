@@ -2069,6 +2069,7 @@ def problem83():
     import heapq
     from time import clock        
 
+    #Dijkstra's search algorithm.
     def search(matrix):
         n = len(matrix)
         vector = (1,0), (0,1), (-1,0), (0,-1)
@@ -2098,7 +2099,6 @@ def problem83():
         
     if __name__ == "__main__":
         main()
-
         
         
 
