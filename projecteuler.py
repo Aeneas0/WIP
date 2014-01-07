@@ -1541,8 +1541,12 @@ def problem68():
 
     def getset(arr):
         vectors = (0,1,2), (3,2,4), (5,4,6), (7,6,8), (9,8,1)
-        this_set = []
-        for i,j,k in vectors:
+        mval, midx = min((val, idx) for (idx, val) in enumerate(
+                            [arr[0], arr[3], arr[5], arr[7], arr[9]]
+                            ))
+        shifted = vectors[midx:] + vectors[:midx]
+        this_set =[]
+        for i,j,k in shifted:
             this_set.append(arr[i])
             this_set.append(arr[j])
             this_set.append(arr[k])
@@ -1560,11 +1564,7 @@ def problem68():
                 if len(ans) == 16:
                     solution_set.add(int(ans))
 
-        print max(solution_set)
-        #Finds the right set, but some answers aren't valid due to the way
-        #the set needs to be expressed.
-        
-            
+        print max(solution_set)            
 
     def test():
         def is_valid(arr):
@@ -1580,8 +1580,6 @@ def problem68():
             
     if __name__ == "__main__":
         main()
-
-problem68()
 
 def problem69():
     """
