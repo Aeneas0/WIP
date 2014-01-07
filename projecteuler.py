@@ -1520,6 +1520,69 @@ def problem65():
     if __name__ == "__main__":
         main()
 
+def problem68():
+    """
+    Using the numbers 1 to 10, and depending on the arrangements, its possible
+    to form  16- and 17- digit strings. What is the maximum 16-digit string
+    for the 'magic' 5-gon ring?
+    """
+    #Rather than use networkx to create a graph, use a 1d array.
+    #With "lines" as follows: 0-1-2, 3-2-4, 5-4-6, 7-6-8, 9-8-1
+    #Outer vertices: 0, 3, 5, 7, 9
+    from itertools import permutations
+    from time import clock
+
+    def is_valid(arr):
+        vectors = (0,1,2), (3,2,4), (5,4,6), (7,6,8), (9,8,1)
+        solutions = set() 
+        for i,j,k in vectors:
+            solutions.add(arr[i] + arr[j] + arr[k])
+        return len(solutions) == 1
+
+    def getset(arr):
+        vectors = (0,1,2), (3,2,4), (5,4,6), (7,6,8), (9,8,1)
+        this_set = []
+        for i,j,k in vectors:
+            this_set.append(arr[i])
+            this_set.append(arr[j])
+            this_set.append(arr[k])
+        return ''.join(str(num) for num in this_set)
+        
+    
+    def main():
+        t0 = clock()
+        vals = range(1,11)
+        perms = list(permutations(vals))
+        solution_set = set()
+        for perm in perms:
+            if is_valid(perm):
+                ans = getset(perm)
+                if len(ans) == 16:
+                    solution_set.add(int(ans))
+
+        print max(solution_set)
+        #Finds the right set, but some answers aren't valid due to the way
+        #the set needs to be expressed.
+        
+            
+
+    def test():
+        def is_valid(arr):
+            vectors = (0,1,2), (3,2,4), (5,4,1)
+            solutions = set()
+            for i,j,k in vectors:
+                 solutions.add(arr[i] + arr[j] + arr[k])
+            return len(solutions) == 1
+
+        myarray = [4,3,2,6,1,5]
+        
+        print is_valid(myarray)
+            
+    if __name__ == "__main__":
+        main()
+
+problem68()
+
 def problem69():
     """
     Find the value of n <= 1,000,000 for which n/phi(n) is a maximum.
