@@ -2247,13 +2247,15 @@ def problem89():
     necessarily minimal, but valid roman numeral order. Find the number of
     characters saved by writing each othese in their minimum form.
     """
-    cryptoDict = {'M': 1000, 'D': 500, 'C': 100, 'L': 50, 'X': 10,
-                      'V': 5, 'I': 1}
+    cryptoDict = {'M': 1000, 'CM': 900, 'D': 500, 'CD':400, 'C': 100, 'XC':90,
+                  'L': 50, 'XL': 40, 'X': 10, 'IX':9, 'V': 5, 'IV':4, 'I': 1}
 
     def roman_to_int(inArr):
         return sum([cryptoDict[x] for x in inArr])
 
     def int_to_minimal_roman(n):
+        for k ,v in cryptoDict.iteritems():
+            if n == v: return k
         if (n / 1000 > 0):
             return "M" * (n/1000) + int_to_minimal_roman(n%1000)
         if (n / 500 > 0):
@@ -2274,17 +2276,34 @@ def problem89():
 
     def minimumForm(inStr):
         return int_to_minimal_roman(roman_to_int(tokenize(inStr)))
+
+    def replace(inStr):
+        outStr = inStr
+        methods = [
+        ("VIIII", "IX"), 
+        ("IIII", "IV"), 
+        ("LXXXX", "XC"), 
+        ("XXXX", "XL"),
+        ("DCCCC", "CM"), 
+        ("CCCC", "CD"),
+        ]
+        for old, new in methods:
+            outStr = outStr.replace(old, new)
+        return outStr
         
     def main():
         f = open('roman.txt', 'r')
-        originalCount, finalCount, totalCount = 0, 0, 0
+        originalCount, finalCount = 0, 0
         for line in f.read().split('\n'):
             originalCount += len(line)
-            finalCount += len(minimumForm(line))
+            finalCount += len(replace(line))
 
         print originalCount - finalCount
-        
-            
+
+    def test():
+        print replace("XVIIII")
+                    
     if __name__ == "__main__":
         main()
+        #test()
 
