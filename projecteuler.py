@@ -2241,3 +2241,50 @@ def problem87():
     if __name__ == "__main__":
         main()
     
+def problem89():
+    """
+    The 11k txt file 'roman.txt' contains 11 thosuand numbers in not
+    necessarily minimal, but valid roman numeral order. Find the number of
+    characters saved by writing each othese in their minimum form.
+    """
+    cryptoDict = {'M': 1000, 'D': 500, 'C': 100, 'L': 50, 'X': 10,
+                      'V': 5, 'I': 1}
+
+    def roman_to_int(inArr):
+        return sum([cryptoDict[x] for x in inArr])
+
+    def int_to_minimal_roman(n):
+        if (n / 1000 > 0):
+            return "M" * (n/1000) + int_to_minimal_roman(n%1000)
+        if (n / 500 > 0):
+            return "D" * (n/500) + int_to_minimal_roman(n%500)
+        if (n / 100 > 0):
+            return "C" * (n/100) + int_to_minimal_roman(n%100)
+        if (n / 50 > 0):
+            return "L" * (n/50) + int_to_minimal_roman(n%50)
+        if (n / 10 > 0):
+            return "X" * (n/10) + int_to_minimal_roman(n%10)
+        if (n / 5 > 0):
+            return "V" * (n/5) + int_to_minimal_roman(n%5)
+        return "I" * n
+
+    def tokenize(inStr):
+        intersperse = inStr.replace("", " ")[1:-1]
+        return intersperse.split(" ")
+
+    def minimumForm(inStr):
+        return int_to_minimal_roman(roman_to_int(tokenize(inStr)))
+        
+    def main():
+        f = open('roman.txt', 'r')
+        originalCount, finalCount, totalCount = 0, 0, 0
+        for line in f.read().split('\n'):
+            originalCount += len(line)
+            finalCount += len(minimumForm(line))
+
+        print originalCount - finalCount
+        
+            
+    if __name__ == "__main__":
+        main()
+
