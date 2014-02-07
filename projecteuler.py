@@ -1476,9 +1476,10 @@ def problem63():
 
 def problem65():
     """
-    Find the sum of digits in the numberator of the 100th convergent of the
+    Find the sum of digits in the numerator of the 100th convergent of the
     continued fraction for e.
     """
+    from time import clock
 
     def a(n):
         if n == 0:
@@ -1514,8 +1515,10 @@ def problem65():
         return ans
         
     def main():
+        t0 = clock()
         num = getnumerator(100)
         print sum([int(digit) for digit in str(num)])
+        print clock() - t0
 
     if __name__ == "__main__":
         main()
@@ -2160,8 +2163,81 @@ def problem83():
         
     if __name__ == "__main__":
         main()
+
+def problem85():
+    """
+    By counting carefully it can be seen that a rectangular grid measuring 3 by 2
+    contians eighteen triangles. Althrough there exists no rectangular grid that
+    contains exactly two million rectangles, find the area of the nearest soln.
+    """
+    from math import factorial
+    from time import clock
+
+    #Mathematically, for an m x n matrix there will be (m+1) vertical lines and
+    # (n+1) horizontal lines. Any sub-square or rectangle will be made up by
+    # two of each vertical and horizaontal lines. Therefore there will be
+    # ((m+1) C 2) * ((n+1) C 2) sub squares or rectangles.
+
+    def numSubs(m, n):
+        return (C(m+1, 2) * C(n+1, 2))
         
+    def C(n,k):
+        return (factorial(n) / (factorial (k) * (factorial (n - k))))
+
+    def main():
+        t0 = clock()
+        results = {}
+        for m in xrange(1,100):
+            for n in xrange(m, 100):
+                results[(m,n)] = abs(numSubs(m,n) - 2000000)
+                
+        best = min(results, key=results.get)
+        print best, (best[0] * best[1])
+        print clock() - t0
         
+    if __name__ == "__main__":
+        main()
 
+def problem87():
+    """
+    How many numbers below fifty million can be expressed as the sum of a prime
+    square, prime cube, and prime fourth power?
+    """
+    import itertools
+    from math import sqrt
+    from time import clock
 
+    def powers(a,b,c):
+        return a**2 + b**3 + c**4
+    
+    def sieve_for_primes_to(n):
+        size = n//2
+        sieve = [1]*size
+        limit = int(n**0.5)
+        for i in range(1,limit):
+            if sieve[i]:
+                val = 2*i+1
+                tmp = ((size-1) - i)//val 
+                sieve[i+val::val] = [0]*tmp
+        return [2] + [i*2+1 for i, v in enumerate(sieve) if v and i>0]
 
+    def main():
+        UPPER = 50000000
+        UPPER_SQRT = int(sqrt(UPPER)+1)
+        primes = sieve_for_primes_to(UPPER_SQRT)
+        nums = set()
+        t0 = clock()
+        for a in primes:
+            for b in primes:
+                for c in primes:
+                    ans = powers(a,b,c)
+                    if (ans < UPPER):
+                        nums.add(ans)
+                    else:
+                        break
+        print len(nums)
+        print clock() - t0
+                    
+    if __name__ == "__main__":
+        main()
+    
