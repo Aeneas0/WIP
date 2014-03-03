@@ -2284,7 +2284,45 @@ def problem89():
 
         print originalCount - finalCount
         
-            
     if __name__ == "__main__":
         main()
+
+def problem99():
+    """
+    Comparing two numbers written in index form like 2^11 and 3^7 is not
+    difficult, as any calculator would confirm 2^11 = 2048 < 3^7 = 2187.
+
+    However, confirming that 632382^518061 > 519432^525806 would be much more
+    difficult, as both numbers contain over three million digits.
+
+    Using base_exp.txt, a 22K text file containing one thousand lines with a
+    base/exponent pair on each line, determine which line number has the
+    greatest numerical value.
+    """
+
+    # Gonna use the power rule of logarithms, where log(x^y) = y*log(x)
+    # to reduce the size of the numbers.
+
+    from urllib import urlopen
+    from numpy import log #base e
+    from time import clock
+
+    f = urlopen('http://projecteuler.net/project/base_exp.txt', 'r').readlines()
+    maxval, bestbase, bestexp, besti = 0, 0, 0, 0
+    BASE, EXP = 0, 1
+    begin = clock()
+    for i, line in enumerate(f):
+        data = tuple(int(i) for i in line.split(','))
+        current = data[EXP]*log(data[BASE]) #power rule
+        if current > maxval:
+            maxval = current
+            bestbase = data[BASE]
+            bestexp = data[EXP]
+            besti = i
+            
+    print "The best line is: ", besti+1
+    print bestbase, "^", bestexp
+    print clock() - begin
+
+    
 
