@@ -2287,6 +2287,77 @@ def problem89():
     if __name__ == "__main__":
         main()
 
+def problem95():
+    """
+    Project Euler, problem 95. Amicable chains.
+    A pair of numbers (a,b) is amicable if the sum of the divisors of a is equal
+    to b. An amicable chain is one a chain that pairs back to its starting point
+
+    Find the smallest member of the longest amicable chain with no element
+    exceeding one million.
+    """
+    import time
+    begin = time.time()
+    LIMIT = 1000000
+
+    memo = {1:[None]} #hash of numbers mapped to their divisors
+
+    for i in xrange(2, LIMIT+1): #all numbers are divisible by 1
+        memo[i] = [1]
+
+    for i in xrange(2, (LIMIT+1)/2): #update memo with divisors of memo[i]
+        step = i
+        count = i + i
+        while count < LIMIT+1:
+            memo[count].append(i)
+            count += i
+    print "Divisors hash created."
+
+    memoSum = {1:None} #this is a hash of sum of divisors
+    
+    for i in xrange(2, LIMIT+1):
+        memoSum[i] = sum(x for x in memo[i]) #map number to sum of its divisors
+
+    print "Sum of divisors hash created"
+    def insertN(n, listA):
+        return [n] + listA
+
+    def createChain(n):
+        chain = []
+        temp = memoSum[n]
+        while temp not in chain:
+            if temp == 1:
+                return None
+            elif temp > LIMIT:
+                return None
+            elif temp == n:
+                return insertN(n, chain)
+            chain.append(temp)
+            temp = memoSum[temp]
+        return None
+
+    memoMin = {} #hash mapping chain length to min value of chain
+
+    for i in xrange(100): #assuming max chain < 100
+        memoMin[i] = []
+
+    longestChain = []
+    for i in xrange(2, LIMIT+1):
+        temp = createChain(i)
+        if temp != None:
+            if len(temp) >= len(longestChain):
+                print "longest chain so far: ", temp, len(temp)
+                longestChain = temp
+                smallest = min(i, min(temp))
+                memoMin[len(temp)].append(smallest)
+                answerLength = len(temp)
+
+    print "The length of the longest amicable chain was ", answerLength
+    print "smallest member of this chain was ", min(memoMin[answerLength])
+
+    end = time.time()
+    print (end-begin), "seconds"
+
 def problem99():
     """
     Comparing two numbers written in index form like 2^11 and 3^7 is not
@@ -2323,6 +2394,3 @@ def problem99():
     print "The best line is: ", besti+1
     print bestbase, "^", bestexp
     print clock() - begin
-
-    
-
